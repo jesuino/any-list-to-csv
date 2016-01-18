@@ -1,10 +1,12 @@
 package org.fxapps.listtocsv;
 
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
-import static java.util.stream.Collectors.*;
 import java.util.stream.Stream;
 
 public class ListToCSV {
@@ -21,18 +23,16 @@ public class ListToCSV {
 		return toCSV(l, ignore, SEPARATOR, HEADER, QUOTE);
 	}
 
-	public static <T extends Object> String toCSV(List<T> l,
-			List<String> ignore, String separator) {
+	public static <T extends Object> String toCSV(List<T> l, List<String> ignore, String separator) {
 		return toCSV(l, ignore, separator, HEADER, QUOTE);
 	}
 
-	public static <T extends Object> String toCSV(List<T> l,
-			List<String> ignore, String separator, boolean header) {
+	public static <T extends Object> String toCSV(List<T> l, List<String> ignore, String separator, boolean header) {
 		return toCSV(l, ignore, separator, header, QUOTE);
 	}
 
-	public static <T extends Object> String toCSV(List<T> l,
-			List<String> ignore, String sep, boolean header, boolean quote) {
+	public static <T extends Object> String toCSV(List<T> l, List<String> ignore, String sep, boolean header,
+			boolean quote) {
 		if (l == null || l.size() == 0) {
 			return "";
 		}
@@ -66,19 +66,32 @@ public class ListToCSV {
 	}
 
 	private static <T> List<String> filter(T c, List<String> ignore) {
-		return Stream.of(c.getClass().getDeclaredFields()).map(Field::getName)
-				.filter(f -> !ignore.contains(f)).collect(toList());
+		return Stream.of(c.getClass().getDeclaredFields()).map(Field::getName).filter(f -> !ignore.contains(f))
+				.collect(toList());
 	}
 
 	private static <T> String invokeGet(T c, String field) {
-		String mName = "get" + Character.toUpperCase(field.charAt(0))
-				+ field.substring(1);
+		field = Character.toUpperCase(field.charAt(0)) + field.substring(1);
+		String mName = "get" + field;
 		try {
-			Method m = c.getClass().getMethod(mName);
-			return String.valueOf(m.invoke(c));
+			return invokeMethod(c, mName);
+		} catch (NoSuchMethodException e) {
+			// if it is a boolean
+			mName = "is" + field;
 		} catch (Exception e) {
 			throw new Error(e);
 		}
+		// try again if it is boolean - dirt workaround :-)
+		try {
+			return invokeMethod(c, mName);
+		} catch (Exception e) {
+			throw new Error(e);
+		}
+	}
+
+	private static <T> String invokeMethod(T c, String mName) throws Exception {
+		Method m = c.getClass().getMethod(mName);
+		return String.valueOf(m.invoke(c));
 	}
 
 }

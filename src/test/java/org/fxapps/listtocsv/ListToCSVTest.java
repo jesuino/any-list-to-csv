@@ -19,12 +19,12 @@ public class ListToCSVTest {
 	String CSV_EXCLUDING_FIELDS = "\"Siqueira\"\n\"Camara\"\n\"Siqueira\"";
 	String CSV_OTHER_SEPARATOR = "\"William\";\"Siqueira\";\"27\"\n\"Luana\";\"Camara\";\"26\"\n\"Antonio\";\"Siqueira\";\"0\"";
 	String CSV_NO_QUOTES = "William,Siqueira,27\nLuana,Camara,26\nAntonio,Siqueira,0";
+	String CSV_WITH_BOOLEAN = "\"true\"\n\"false\"";
 
 	@Test
 	public void toCSVTest() {
-		List<Person> l = Arrays.asList(new Person("William", "Siqueira", 27),
-				new Person("Luana", "Camara", 26), new Person("Antonio",
-						"Siqueira", 0));
+		List<Person> l = Arrays.asList(new Person("William", "Siqueira", 27), new Person("Luana", "Camara", 26),
+				new Person("Antonio", "Siqueira", 0));
 		List<String> empty = Collections.emptyList();
 		List<String> exclude = Arrays.asList("name", "age");
 		String csv = toCSV(l);
@@ -34,13 +34,15 @@ public class ListToCSVTest {
 		String csvExcluding = toCSV(l, exclude);
 		String csvOtherSeparator = toCSV(l, empty, ";");
 		String csvNoQuotes = toCSV(l, empty, ",", false, false);
+		String csvWithBoolean = toCSV(Arrays.asList(new ClassWithBooleanAttr(true), new ClassWithBooleanAttr(false)));
 		assertEquals(CSV, csv);
 		assertEquals(CSV_EXCLUDING_FIELDS, csvExcluding);
 		assertEquals(CSV_OTHER_SEPARATOR, csvOtherSeparator);
-		assertEquals(csvNoQuotes, CSV_NO_QUOTES);
+		assertEquals(CSV_NO_QUOTES, csvNoQuotes);
 		assertEquals(CSV_HEADER, csvHeader);
 		assertEquals(CSV_HEADER_NO_QUOTE, csvHeaderNoQuote);
 		assertEquals(CSV_HEADER_EXCLUDING, csvHeaderExcluding);
+		assertEquals(CSV_WITH_BOOLEAN, csvWithBoolean);
 	}
-	
+
 }
